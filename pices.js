@@ -1,0 +1,13 @@
+const Bpawn = '<div class="piece pawn" color = "black"> <img src="./src/pieces/Bpawn.png" alt="" srcset=""> </div>'
+const Brook = '<div class="piece rook" color = "black"> <img src="./src/pieces/Brook.png" alt="" srcset=""> </div>'
+const Bknight = '<div class="piece knight" color = "black"> <img src="./src/pieces/Bknight.png" alt="" srcset=""> </div>'
+const Bbishop = '<div class="piece bishop" color = "black"> <img src="./src/pieces/Bbishop.png" alt="" srcset=""> </div>'
+const Bking = '<div class="piece king" color = "black"> <img src="./src/pieces/Bking.png" alt="" srcset=""> </div>'
+const Bqueen = '<div class="piece queen" color = "black"> <img src="./src/pieces/Bqueen.png" alt="" srcset=""> </div>'
+
+const pawn = '<div class="piece pawn" color = "white"> <img src="./src/pieces/pawn.png" alt="" srcset=""> </div>'
+const rook = '<div class="piece rook" color = "white"> <img src="./src/pieces/rook.png" alt="" srcset=""> </div>'
+const knight = '<div class="piece knight" color = "white"> <img src="./src/pieces/knight.png" alt="" srcset=""> </div>'
+const bishop = '<div class="piece bishop" color = "white"> <img src="./src/pieces/bishop.png" alt="" srcset=""> </div>'
+const king = '<div class="piece king" color = "white"> <img src="./src/pieces/king.png" alt="" srcset=""> </div>'
+const queen = '<div class="piece queen"  color = "white"> <img src="./src/pieces/queen.png" alt="" srcset=""> </div>'
