@@ -5,34 +5,40 @@ const pieces = document.getElementsByClassName("piece")
 const piecesImages = document.getElementsByTagName("img")
 let highlightedSquares = []; // To keep track of highlighted squares
 
-setupBoardSquares()
-setupPieces()
+setupBoardSquares();
+setupPieces();
+
 function setupBoardSquares() {
-
     for (let i = 0; i < boardSquares.length; i++) {
+        boardSquares[i].addEventListener("dragover", allowDrop);
+        boardSquares[i].addEventListener("drop", drop);
 
-        boardSquares[i].addEventListener("dragover", allowDrop)
-        boardSquares[i].addEventListener("drop", drop)
+        // Add touch event listeners for mobile devices
+        boardSquares[i].addEventListener("touchmove", allowDrop);
+        boardSquares[i].addEventListener("touchend", drop);
     }
 }
 
 function setupPieces() {
-
     for (let i = 0; i < pieces.length; i++) {
-        pieces[i].addEventListener("dragstart", drag)
-        pieces[i].setAttribute("draggable", true)
-        pieces[i].id = pieces[i].className.split(" ")[1] + pieces[i].parentElement.id
+        pieces[i].addEventListener("dragstart", drag);
+        pieces[i].setAttribute("draggable", true);
+
+        // Add touch event listeners for mobile devices
+        pieces[i].addEventListener("touchstart", touchStart);
+        pieces[i].addEventListener("touchmove", touchMove);
+        pieces[i].addEventListener("touchend", touchEnd);
+
+        pieces[i].id = pieces[i].className.split(" ")[1] + pieces[i].parentElement.id;
     }
     for (let i = 0; i < piecesImages.length; i++) {
-        piecesImages[i].setAttribute("draggable", false)
-
+        piecesImages[i].setAttribute("draggable", false);
     }
 }
 
 function allowDrop(ev) {
-    ev.preventDefault()
+    ev.preventDefault();
 }
-
 
 function drag(ev) {
     const piece = ev.target;
@@ -48,8 +54,96 @@ function drag(ev) {
         // Get possible moves and highlight them
         getPossibleMoves(startingSquareId, piece);
         highlightMove(legalSquares);
-
     }
+}
+
+function touchStart(ev) {
+    ev.preventDefault();
+    const touch = ev.targetTouches[0];
+    const piece = ev.target;
+    const pieceColor = piece.getAttribute("color");
+    const startingSquareId = piece.parentNode.id;
+
+    if ((isWhiteTurn && pieceColor == "white") || (!isWhiteTurn && pieceColor == "black")) {
+        piece.classList.add("dragging");
+
+        // Clear previous highlights
+        clearHighlights();
+
+        // Get possible moves and highlight them
+        getPossibleMoves(startingSquareId, piece);
+        highlightMove(legalSquares);
+    }
+}
+
+function touchMove(ev) {
+    ev.preventDefault();
+    const touch = ev.targetTouches[0];
+    const piece = document.querySelector(".dragging");
+    if (piece) {
+        const touchLocation = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (touchLocation.classList.contains("square")) {
+            touchLocation.appendChild(piece);
+        }
+    }
+}
+
+function touchEnd(ev) {
+    ev.preventDefault();
+    const piece = document.querySelector(".dragging");
+    if (piece) {
+        const destinationSquare = piece.parentElement;
+        let destinationSquareId = destinationSquare.id;
+        piece.classList.remove("dragging");
+        clearHighlights();
+
+        if ((isSquareOccupied(destinationSquare) == "blank") && (legalSquares.includes(destinationSquareId))) {
+            destinationSquare.appendChild(piece);
+            isWhiteTurn = !isWhiteTurn;
+            legalSquares.length = 0;
+            checkForCheckAndCheckmate();
+            return;
+        }
+        if ((isSquareOccupied(destinationSquare) !== "blank") && (legalSquares.includes(destinationSquareId))) {
+            while (destinationSquare.firstChild) {
+                destinationSquare.removeChild(destinationSquare.firstChild);
+            }
+            destinationSquare.appendChild(piece);
+            isWhiteTurn = !isWhiteTurn;
+            legalSquares.length = 0;
+            checkForCheckAndCheckmate();
+            return;
+        }
+        legalSquares.length = 0;
+    }
+}
+
+function drop(ev) {
+    ev.preventDefault();
+    let data = ev.dataTransfer.getData("text");
+    const piece = document.getElementById(data);
+    const destinationSquare = ev.currentTarget;
+    let destinationSquareId = destinationSquare.id;
+    clearHighlights();
+
+    if ((isSquareOccupied(destinationSquare) == "blank") && (legalSquares.includes(destinationSquareId))) {
+        destinationSquare.appendChild(piece);
+        isWhiteTurn = !isWhiteTurn;
+        legalSquares.length = 0;
+
+        return;
+    }
+    if ((isSquareOccupied(destinationSquare) !== "blank") && (legalSquares.includes(destinationSquareId))) {
+        while (destinationSquare.firstChild) {
+            destinationSquare.removeChild(destinationSquare.firstChild);
+        }
+        destinationSquare.appendChild(piece);
+        isWhiteTurn = !isWhiteTurn;
+        legalSquares.length = 0;
+ 
+        return;
+    }
+    legalSquares.length = 0;
 }
 
 function highlightMove(validMoves) {
@@ -68,39 +162,6 @@ function clearHighlights() {
     }
     highlightedSquares = []; // Clear the array after removing highlights
 }
-
-
-
-function drop(ev) {
-    ev.preventDefault()
-    let data = ev.dataTransfer.getData("text")
-    const piece = document.getElementById(data)
-    const destinationSquare = ev.currentTarget
-    let destinationSquareId = destinationSquare.id
-    clearHighlights();
-
-    if ((isSquareOccupied(destinationSquare) == "blank") && (legalSquares.includes(destinationSquareId))) {
-
-        destinationSquare.appendChild(piece)
-        isWhiteTurn = !isWhiteTurn
-        legalSquares.length = 0
-        return
-
-    }
-    if ((isSquareOccupied(destinationSquare) !== "blank") && (legalSquares.includes(destinationSquareId))) {
-        while (destinationSquare.firstChild) {
-            destinationSquare.removeChild(destinationSquare.firstChild)
-
-        }
-        destinationSquare.appendChild(piece)
-        isWhiteTurn = !isWhiteTurn
-        legalSquares.length = 0
-        return
-    }
-    legalSquares.length = 0
-
-}
-
 
 function getPossibleMoves(startingSquareId, piece) {
     const pieceColor = piece.getAttribute("color")
