@@ -11,7 +11,7 @@ const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 setupBoardSquares();
 setupPieces();
 
-ffunction setupBoardSquares() {
+function setupBoardSquares() {
     for (let i = 0; i < boardSquares.length; i++) {
         // Desktop events
         boardSquares[i].addEventListener("dragover", allowDrop);
