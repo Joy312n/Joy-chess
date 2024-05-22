@@ -10,7 +10,6 @@ const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 setupBoardSquares();
 setupPieces();
-
 function setupBoardSquares() {
     for (let i = 0; i < boardSquares.length; i++) {
         // Desktop events
