@@ -11,27 +11,27 @@ const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 setupBoardSquares();
 setupPieces();
 
-function setupBoardSquares() {
+ffunction setupBoardSquares() {
     for (let i = 0; i < boardSquares.length; i++) {
-        if (!isMobile) {
-            boardSquares[i].addEventListener("dragover", allowDrop);
-            boardSquares[i].addEventListener("drop", drop);
-        } else {
-            boardSquares[i].addEventListener("click", mobileDrop);
-        }
+        // Desktop events
+        boardSquares[i].addEventListener("dragover", allowDrop);
+        boardSquares[i].addEventListener("drop", drop);
+
+        // Mobile events
+        boardSquares[i].addEventListener("touchmove", touchMove);
+        boardSquares[i].addEventListener("touchend", touchDrop);
     }
 }
 
 function setupPieces() {
     for (let i = 0; i < pieces.length; i++) {
-        if (!isMobile) {
-            pieces[i].addEventListener("dragstart", drag);
-            pieces[i].setAttribute("draggable", true);
-        } else {
-            pieces[i].addEventListener("click", selectPiece);
-        }
-
+        // Desktop events
+        pieces[i].addEventListener("dragstart", drag);
+        pieces[i].setAttribute("draggable", true);
         pieces[i].id = pieces[i].className.split(" ")[1] + pieces[i].parentElement.id;
+
+        // Mobile events
+        pieces[i].addEventListener("touchstart", touchStart);
     }
     for (let i = 0; i < piecesImages.length; i++) {
         piecesImages[i].setAttribute("draggable", false);
@@ -71,7 +71,6 @@ function drop(ev) {
         destinationSquare.appendChild(piece);
         isWhiteTurn = !isWhiteTurn;
         legalSquares.length = 0;
-        checkForCheckAndCheckmate();
         return;
     }
     if ((isSquareOccupied(destinationSquare) !== "blank") && (legalSquares.includes(destinationSquareId))) {
@@ -81,59 +80,67 @@ function drop(ev) {
         destinationSquare.appendChild(piece);
         isWhiteTurn = !isWhiteTurn;
         legalSquares.length = 0;
-        checkForCheckAndCheckmate();
         return;
     }
     legalSquares.length = 0;
 }
 
-function selectPiece(ev) {
+// Touch event handlers
+let touchedPiece = null;
+
+function touchStart(ev) {
+    ev.preventDefault();
+    const touch = ev.touches[0];
     const piece = ev.target;
     const pieceColor = piece.getAttribute("color");
     const startingSquareId = piece.parentNode.id;
 
     if ((isWhiteTurn && pieceColor == "white") || (!isWhiteTurn && pieceColor == "black")) {
-        selectedPiece = piece;
-
-        // Clear previous highlights
+        touchedPiece = piece;
         clearHighlights();
-
-        // Get possible moves and highlight them
         getPossibleMoves(startingSquareId, piece);
         highlightMove(legalSquares);
     }
 }
 
-function mobileDrop(ev) {
-    const destinationSquare = ev.currentTarget;
-    let destinationSquareId = destinationSquare.id;
+function touchMove(ev) {
+    ev.preventDefault();
+    const touch = ev.touches[0];
+    const destinationSquare = document.elementFromPoint(touch.clientX, touch.clientY);
 
-    if (!selectedPiece) return;
-
-    clearHighlights();
-
-    if ((isSquareOccupied(destinationSquare) == "blank") && (legalSquares.includes(destinationSquareId))) {
-        destinationSquare.appendChild(selectedPiece);
-        isWhiteTurn = !isWhiteTurn;
-        legalSquares.length = 0;
-        selectedPiece = null;
-        checkForCheckAndCheckmate();
-        return;
+    if (destinationSquare && destinationSquare.classList.contains("board-square")) {
+        destinationSquare.style.backgroundColor = "lightgrey"; // Optional: Add visual feedback
     }
-    if ((isSquareOccupied(destinationSquare) !== "blank") && (legalSquares.includes(destinationSquareId))) {
-        while (destinationSquare.firstChild) {
-            destinationSquare.removeChild(destinationSquare.firstChild);
-        }
-        destinationSquare.appendChild(selectedPiece);
-        isWhiteTurn = !isWhiteTurn;
-        legalSquares.length = 0;
-        selectedPiece = null;
-        checkForCheckAndCheckmate();
-        return;
-    }
-    legalSquares.length = 0;
-    selectedPiece = null;
 }
+
+function touchDrop(ev) {
+    ev.preventDefault();
+    const touch = ev.changedTouches[0];
+    const destinationSquare = document.elementFromPoint(touch.clientX, touch.clientY);
+
+    if (destinationSquare && destinationSquare.classList.contains("board-square")) {
+        const destinationSquareId = destinationSquare.id;
+        clearHighlights();
+
+        if ((isSquareOccupied(destinationSquare) == "blank") && (legalSquares.includes(destinationSquareId))) {
+            destinationSquare.appendChild(touchedPiece);
+            isWhiteTurn = !isWhiteTurn;
+            legalSquares.length = 0;
+            return;
+        }
+        if ((isSquareOccupied(destinationSquare) !== "blank") && (legalSquares.includes(destinationSquareId))) {
+            while (destinationSquare.firstChild) {
+                destinationSquare.removeChild(destinationSquare.firstChild);
+            }
+            destinationSquare.appendChild(touchedPiece);
+            isWhiteTurn = !isWhiteTurn;
+            legalSquares.length = 0;
+            return;
+        }
+        legalSquares.length = 0;
+    }
+}
+
 
 function highlightMove(validMoves) {
     for (let item of validMoves) {
