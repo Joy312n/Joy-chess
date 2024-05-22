@@ -1,33 +1,35 @@
-let legalSquares = []
-let isWhiteTurn = true
-const boardSquares = document.getElementsByClassName("square")
-const pieces = document.getElementsByClassName("piece")
-const piecesImages = document.getElementsByTagName("img")
+let legalSquares = [];
+let isWhiteTurn = true;
+let selectedPiece = null;
+const boardSquares = document.getElementsByClassName("square");
+const pieces = document.getElementsByClassName("piece");
+const piecesImages = document.getElementsByTagName("img");
 let highlightedSquares = []; // To keep track of highlighted squares
+
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 setupBoardSquares();
 setupPieces();
 
 function setupBoardSquares() {
     for (let i = 0; i < boardSquares.length; i++) {
-        boardSquares[i].addEventListener("dragover", allowDrop);
-        boardSquares[i].addEventListener("drop", drop);
-
-        // Add touch event listeners for mobile devices
-        boardSquares[i].addEventListener("touchmove", allowDrop);
-        boardSquares[i].addEventListener("touchend", drop);
+        if (!isMobile) {
+            boardSquares[i].addEventListener("dragover", allowDrop);
+            boardSquares[i].addEventListener("drop", drop);
+        } else {
+            boardSquares[i].addEventListener("click", mobileDrop);
+        }
     }
 }
 
 function setupPieces() {
     for (let i = 0; i < pieces.length; i++) {
-        pieces[i].addEventListener("dragstart", drag);
-        pieces[i].setAttribute("draggable", true);
-
-        // Add touch event listeners for mobile devices
-        pieces[i].addEventListener("touchstart", touchStart);
-        pieces[i].addEventListener("touchmove", touchMove);
-        pieces[i].addEventListener("touchend", touchEnd);
+        if (!isMobile) {
+            pieces[i].addEventListener("dragstart", drag);
+            pieces[i].setAttribute("draggable", true);
+        } else {
+            pieces[i].addEventListener("click", selectPiece);
+        }
 
         pieces[i].id = pieces[i].className.split(" ")[1] + pieces[i].parentElement.id;
     }
@@ -57,67 +59,6 @@ function drag(ev) {
     }
 }
 
-function touchStart(ev) {
-    ev.preventDefault();
-    const touch = ev.targetTouches[0];
-    const piece = ev.target;
-    const pieceColor = piece.getAttribute("color");
-    const startingSquareId = piece.parentNode.id;
-
-    if ((isWhiteTurn && pieceColor == "white") || (!isWhiteTurn && pieceColor == "black")) {
-        piece.classList.add("dragging");
-
-        // Clear previous highlights
-        clearHighlights();
-
-        // Get possible moves and highlight them
-        getPossibleMoves(startingSquareId, piece);
-        highlightMove(legalSquares);
-    }
-}
-
-function touchMove(ev) {
-    ev.preventDefault();
-    const touch = ev.targetTouches[0];
-    const piece = document.querySelector(".dragging");
-    if (piece) {
-        const touchLocation = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (touchLocation.classList.contains("square")) {
-            touchLocation.appendChild(piece);
-        }
-    }
-}
-
-function touchEnd(ev) {
-    ev.preventDefault();
-    const piece = document.querySelector(".dragging");
-    if (piece) {
-        const destinationSquare = piece.parentElement;
-        let destinationSquareId = destinationSquare.id;
-        piece.classList.remove("dragging");
-        clearHighlights();
-
-        if ((isSquareOccupied(destinationSquare) == "blank") && (legalSquares.includes(destinationSquareId))) {
-            destinationSquare.appendChild(piece);
-            isWhiteTurn = !isWhiteTurn;
-            legalSquares.length = 0;
-            checkForCheckAndCheckmate();
-            return;
-        }
-        if ((isSquareOccupied(destinationSquare) !== "blank") && (legalSquares.includes(destinationSquareId))) {
-            while (destinationSquare.firstChild) {
-                destinationSquare.removeChild(destinationSquare.firstChild);
-            }
-            destinationSquare.appendChild(piece);
-            isWhiteTurn = !isWhiteTurn;
-            legalSquares.length = 0;
-            checkForCheckAndCheckmate();
-            return;
-        }
-        legalSquares.length = 0;
-    }
-}
-
 function drop(ev) {
     ev.preventDefault();
     let data = ev.dataTransfer.getData("text");
@@ -130,7 +71,7 @@ function drop(ev) {
         destinationSquare.appendChild(piece);
         isWhiteTurn = !isWhiteTurn;
         legalSquares.length = 0;
-
+        checkForCheckAndCheckmate();
         return;
     }
     if ((isSquareOccupied(destinationSquare) !== "blank") && (legalSquares.includes(destinationSquareId))) {
@@ -140,10 +81,58 @@ function drop(ev) {
         destinationSquare.appendChild(piece);
         isWhiteTurn = !isWhiteTurn;
         legalSquares.length = 0;
- 
+        checkForCheckAndCheckmate();
         return;
     }
     legalSquares.length = 0;
+}
+
+function selectPiece(ev) {
+    const piece = ev.target;
+    const pieceColor = piece.getAttribute("color");
+    const startingSquareId = piece.parentNode.id;
+
+    if ((isWhiteTurn && pieceColor == "white") || (!isWhiteTurn && pieceColor == "black")) {
+        selectedPiece = piece;
+
+        // Clear previous highlights
+        clearHighlights();
+
+        // Get possible moves and highlight them
+        getPossibleMoves(startingSquareId, piece);
+        highlightMove(legalSquares);
+    }
+}
+
+function mobileDrop(ev) {
+    const destinationSquare = ev.currentTarget;
+    let destinationSquareId = destinationSquare.id;
+
+    if (!selectedPiece) return;
+
+    clearHighlights();
+
+    if ((isSquareOccupied(destinationSquare) == "blank") && (legalSquares.includes(destinationSquareId))) {
+        destinationSquare.appendChild(selectedPiece);
+        isWhiteTurn = !isWhiteTurn;
+        legalSquares.length = 0;
+        selectedPiece = null;
+        checkForCheckAndCheckmate();
+        return;
+    }
+    if ((isSquareOccupied(destinationSquare) !== "blank") && (legalSquares.includes(destinationSquareId))) {
+        while (destinationSquare.firstChild) {
+            destinationSquare.removeChild(destinationSquare.firstChild);
+        }
+        destinationSquare.appendChild(selectedPiece);
+        isWhiteTurn = !isWhiteTurn;
+        legalSquares.length = 0;
+        selectedPiece = null;
+        checkForCheckAndCheckmate();
+        return;
+    }
+    legalSquares.length = 0;
+    selectedPiece = null;
 }
 
 function highlightMove(validMoves) {
@@ -162,6 +151,8 @@ function clearHighlights() {
     }
     highlightedSquares = []; // Clear the array after removing highlights
 }
+
+
 
 function getPossibleMoves(startingSquareId, piece) {
     const pieceColor = piece.getAttribute("color")
