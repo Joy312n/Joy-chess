@@ -205,7 +205,7 @@ function generateFEN(boardSquaresArray) {
 
 const selectedLevel = 15;
 function getBestMove(fen, selectedLevel, callback) {
-    let engine = new Worker("https://github.com/Joy312n/Joy-chess/node_modules/stockfish/src/stockfish.js");
+    let engine = new Worker("./node_modules/stockfish/src/stockfish.js");
     engine.onmessage = function (event) {
         let message = event.data;
         if (message.startsWith("bestmove")) {
