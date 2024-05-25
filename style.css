@@ -8,11 +8,12 @@ body{
 
 
 #gameboard{
-    width: 80vh;
-    height: 80vh;
-    /* background-color: black; */
+    width: 250px;
+    height: 250px;
     display: flex;
     flex-wrap: wrap;
+    border: 2px solid #0174f796;
+    border-radius: 2px;
 }
 .square {
     height: 12.5%;
@@ -24,18 +25,9 @@ body{
     position: relative;
 
 }
-/* .square img{
-    height: 30px;
-    width: 30px;
-    margin: 5px;
-    justify-content: center;
-    z-index: 1;
-    cursor:pointer;
 
-} */
 .square.highlight {
-    box-shadow: inset 0 0 20px rgba(2, 248, 146, 0.719);
-
+    box-shadow: inset 0 0 5px rgba(31, 2, 248, 0.466);
 }
 .piece{
     width: 100%;
@@ -60,10 +52,56 @@ body{
     fill: blue;
 }
 
+#alert{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+    position: fixed;
+}
+
 @media (min-width:600px) {
     .gameBoard{
         width: 600px;
         height: 600px;
     }
     
+}
+
+#promotion-overlay .piece {
+    width: 50px;
+    height: 50px;
+    background-size: cover;
+}
+
+#promotion-overlay .queen.white {
+    background-image: url('src/pieces/queen.png');
+}
+
+#promotion-overlay .rook.white {
+    background-image: url('src/pieces/rook.png');
+}
+
+#promotion-overlay .bishop.white {
+    background-image: url('src/pieces/bishop.png');
+}
+
+#promotion-overlay .knight.white {
+    background-image: url('src/pieces/knight.png');
+}
+
+#promotion-overlay .queen.black {
+    background-image: url('src/pieces/Bqueen.png');
+}
+
+#promotion-overlay .rook.black {
+    background-image: url('src/pieces/Brook.png');
+}
+
+#promotion-overlay .bishop.black {
+    background-image: url('src/pieces/Bbishop.png');
+}
+
+#promotion-overlay .knight.black {
+    background-image: url('src/pieces/Bknight.png');
 }
