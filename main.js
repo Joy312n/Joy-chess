@@ -92,58 +92,58 @@ function fillBoardSquaresArray() {
 //     // console.log(fen);
 //     return fen + " b";
 // }
-function generateFEN(boardSquaresArray) {
-    let fen = '';
-    let emptyCount = 0;
+// function generateFEN(boardSquaresArray) {
+//     let fen = '';
+//     let emptyCount = 0;
 
-    const pieceTypeToFEN = {
-        'pawn': 'p',
-        'knight': 'n',
-        'bishop': 'b',
-        'rook': 'r',
-        'queen': 'q',
-        'king': 'k'
-    };
+//     const pieceTypeToFEN = {
+//         'pawn': 'p',
+//         'knight': 'n',
+//         'bishop': 'b',
+//         'rook': 'r',
+//         'queen': 'q',
+//         'king': 'k'
+//     };
 
-    for (let rank = 8; rank >= 1; rank--) {
-        for (let file = 1; file <= 8; file++) {
-            let arrayElement = boardSquaresArray.find(element => element.squareId === `${String.fromCharCode(96 + file)}${rank}`);
+//     for (let rank = 8; rank >= 1; rank--) {
+//         for (let file = 1; file <= 8; file++) {
+//             let arrayElement = boardSquaresArray.find(element => element.squareId === `${String.fromCharCode(96 + file)}${rank}`);
 
-            if (arrayElement) {
-                if (emptyCount > 0) {
-                    fen += emptyCount;
-                    emptyCount = 0;
-                }
-                let pieceChar = pieceTypeToFEN[arrayElement.pieceType];
-                if (!pieceChar) {
-                    // console.error(`Unrecognized piece type: ${arrayElement.pieceType}`);
-                    for (let i = 8; i > 0; i--) {
-                        let regex = new RegExp('blank'.repeat(i), 'g');
-                        fen = fen.replace(regex, i.toString());
-                    }
-                    // continue; // Skip unrecognized pieces
-                }
-                fen += arrayElement.pieceColor === 'white' ? pieceChar.toUpperCase() : pieceChar.toLowerCase();
-            } else {
-                emptyCount++;
-            }
-        }
+//             if (arrayElement) {
+//                 if (emptyCount > 0) {
+//                     fen += emptyCount;
+//                     emptyCount = 0;
+//                 }
+//                 let pieceChar = pieceTypeToFEN[arrayElement.pieceType];
+//                 if (!pieceChar) {
+//                     // console.error(`Unrecognized piece type: ${arrayElement.pieceType}`);
+//                     for (let i = 8; i > 0; i--) {
+//                         let regex = new RegExp('blank'.repeat(i), 'g');
+//                         fen = fen.replace(regex, i.toString());
+//                     }
+//                     // continue; // Skip unrecognized pieces
+//                 }
+//                 fen += arrayElement.pieceColor === 'white' ? pieceChar.toUpperCase() : pieceChar.toLowerCase();
+//             } else {
+//                 emptyCount++;
+//             }
+//         }
 
-        if (emptyCount > 0) {
-            fen += emptyCount;
-            emptyCount = 0;
-        }
+//         if (emptyCount > 0) {
+//             fen += emptyCount;
+//             emptyCount = 0;
+//         }
 
-        if (rank > 1) {
-            fen += '/';
-        }
-    }
+//         if (rank > 1) {
+//             fen += '/';
+//         }
+//     }
 
-    // Add turn to move (you might want to handle this dynamically)
-    fen += " b"; // 'b' indicates black to move; replace with 'w' if white's turn.
+//     // Add turn to move (you might want to handle this dynamically)
+//     fen += " b"; // 'b' indicates black to move; replace with 'w' if white's turn.
 
-    return fen;
-}
+//     return fen;
+// }
 function generateFEN(boardSquaresArray) {
     let fen = '';
     let emptyCount = 0;
@@ -205,7 +205,7 @@ function generateFEN(boardSquaresArray) {
 
 const selectedLevel = 15;
 function getBestMove(fen, selectedLevel, callback) {
-    let engine = new Worker("./node_modules/stockfish/src/stockfish.js");
+    let engine = new Worker("https://github.com/Joy312n/Joy-chess/node_modules/stockfish/src/stockfish.js");
     engine.onmessage = function (event) {
         let message = event.data;
         if (message.startsWith("bestmove")) {
